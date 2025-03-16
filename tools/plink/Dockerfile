@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         g++ \
         gcc \
-        libblas-dev \
         libatlas-base-dev \
+        libblas-dev \
         liblapack-dev \
         make
 
@@ -24,8 +24,8 @@ FROM ubuntu:24.04@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe098
 WORKDIR /workspace/plink-production
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libblas3 \
         libatlas3-base \
+        libblas3 \
         liblapack3
 
 COPY --from=build /usr/local/bin/plink /usr/local/bin/plink
