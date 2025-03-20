@@ -7,3 +7,5 @@ resources
 tools/plink/archive
 tools/plink/plink-resources
 tools/plink/*.txt
+tools/tassel/*.txt
+
