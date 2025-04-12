@@ -1,4 +1,4 @@
-FROM ubuntu:24.04@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe09856619a782 AS gcta-build
+FROM ubuntu:24.04@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe09856619a782 AS build
 
 WORKDIR /workspace/program/gcta
 
@@ -59,5 +59,10 @@ RUN cd codebase \
         && make \
         && cp gcta64 /usr/bin \
         && ln -s /usr/bin/gcta64 /usr/bin/gcta
+
+FROM ubuntu:24.04@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe09856619a782 AS production
+
+COPY --from=build /lib /lib
+COPY --from=build /usr /usr
 
 WORKDIR /workspace/program/gcta/production
