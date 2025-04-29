@@ -1,35 +1,22 @@
-FROM ubuntu:24.04@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe09856619a782 AS build
+FROM alpine:3.18.12@sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f AS build
 
 WORKDIR /workspace/program/gcta
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates \
+RUN apk update && apk add \
+        boost-dev \
+        clang \
+        clang-extra-tools \
         cmake \
-        g++-12 \
-        gcc-12 \
-        gfortran-12 \
-        libgsl-dev \
-        libspectra-dev \
-        libsqlite3-dev \
-        libzstd-dev \
+        g++ \
+        gcc \
+        gfortran \
+        gsl-dev \
         make \
+        perl \
+        sqlite-dev \
         wget \
-        zlib1g-dev
-
-RUN ln -s /usr/bin/g++-12 /usr/bin/g++ \
-        && ln -s /usr/bin/gcc-12 /usr/bin/gcc \
-        && ln -s /usr/bin/gfortran-12 /usr/bin/gfortran
-
-RUN mkdir -p dependencies \
-        && cd dependencies \
-        && wget https://archives.boost.io/release/1.82.0/source/boost_1_82_0.tar.gz \
-        && tar -xzvf boost_1_82_0.tar.gz
-
-RUN cd dependencies/boost_1_82_0 \
-        && ./bootstrap.sh \
-        && ./b2 \
-        && ./b2 headers \
-        && ./b2 install --prefix="/usr/include/boost"
+        zlib-dev \
+        zstd-dev
 
 ADD https://github.com/OpenMathLib/OpenBLAS.git#v0.3.15 ./dependencies/openblas
 
@@ -42,15 +29,23 @@ ADD https://gitlab.com/libeigen/eigen.git#3.3.7 ./dependencies/eigen
 RUN cd dependencies/eigen \
         && mkdir -p build \
         && cd build \
-        && cmake ../ -DBLAS_DIR="/usr/include/openblas"\
+        && cmake ../ -DBLAS_DIR="/usr/include/openblas" \
+        && make install
+
+ADD https://github.com/yixuan/spectra.git#v1.1.0 ./dependencies/spectra
+
+RUN cd dependencies/spectra \
+        && mkdir -p build \
+        && cd build \
+        && cmake -DCMAKE_INSTALL_PREFIX="/usr/include/spectra" -DCMAKE_PREFIX_PATH="/usr/local/include/eigen3" ../ \
         && make install
 
 ADD https://github.com/jianyangqt/gcta.git#v1.94.1 ./codebase
 
 ENV BOOST_LIB="/usr/include/boost/include" \
-        EIGEN3_INCLUDE_DIR="/usr/include/eigen3" \
+        EIGEN3_INCLUDE_DIR="/usr/local/include/eigen3" \
         OPENBLAS="/usr/include/openblas" \
-        SPECTRA_LIB="/usr/include/Spectra"
+        SPECTRA_LIB="/usr/include/spectra/include"
 
 RUN cd codebase \
         && mkdir -p build \
@@ -60,7 +55,7 @@ RUN cd codebase \
         && cp gcta64 /usr/bin \
         && ln -s /usr/bin/gcta64 /usr/bin/gcta
 
-FROM ubuntu:24.04@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe09856619a782 AS production
+FROM alpine:3.18.12@sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f AS production
 
 COPY --from=build /lib /lib
 COPY --from=build /usr /usr

@@ -9,6 +9,7 @@ tools/plink/plink-resources
 tools/plink/*.txt
 tools/tassel/*.txt
 tools/gapit/gapit-resources
+tools/gapit/*.txt
 tools/gcta/gcta-resources
 tools/gcta/*.txt
 tools/fastlmm/*.txt
