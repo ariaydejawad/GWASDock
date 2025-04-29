@@ -57,7 +57,19 @@ RUN cd codebase \
 
 FROM alpine:3.18.12@sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f AS production
 
-COPY --from=build /lib /lib
-COPY --from=build /usr /usr
+COPY --from=build /usr/lib/libsqlite3.so.0* \
+        /usr/lib/libzstd.so.1* \
+        /usr/lib/libgsl.so.27* \
+        /usr/lib/libgslcblas.so.0* \
+        /usr/lib/libgomp.so.1* \
+        /usr/lib/libgfortran.so.5* \
+        /usr/lib/libgcc_s.so.1 \
+        /usr/lib/
+
+COPY --from=build /usr/include/openblas/lib/libopenblas.so.0* \
+        /usr/include/openblas/lib/
+
+COPY --from=build /usr/bin/gcta* \
+        /usr/bin/
 
 WORKDIR /workspace/program/gcta/production
