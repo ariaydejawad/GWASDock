@@ -1,0 +1,79 @@
+FROM debian:bookworm-slim@sha256:4b50eb66f977b4062683ff434ef18ac191da862dbe966961bc11990cf5791a8d AS build
+
+WORKDIR /workspace/program/gcta
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        cmake \
+        g++ \
+        gcc \
+        gfortran \
+        gpg \
+        gpg-agent \
+        libboost-all-dev \
+        libgsl-dev \
+        libspectra-dev \
+        libsqlite3-dev \
+        libzstd-dev \
+        make \
+        wget \
+        zlib1g-dev
+
+RUN wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+        | gpg --dearmor \
+        | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null \
+        && echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+        | tee /etc/apt/sources.list.d/oneAPI.list \
+        && apt-get update \
+        && apt-get install -y --no-install-recommends intel-oneapi-mkl-devel
+
+ADD https://gitlab.com/libeigen/eigen.git#3.3.7 ./dependencies/eigen
+
+RUN cd dependencies/eigen \
+        && mkdir -p build \
+        && cd build \
+        && cmake ../ \
+        && make install
+
+ADD https://github.com/jianyangqt/gcta.git#v1.94.1 ./codebase
+
+ENV BOOST_LIB="/usr/include/boost" \
+        EIGEN3_INCLUDE_DIR="/usr/local/include/eigen3" \
+        MKLROOT="/opt/intel/oneapi/mkl/2025.1/" \
+        SPECTRA_LIB="/usr/include/Spectrae"
+
+RUN cd codebase \
+        && mkdir -p build \
+        && cd build \
+        && cmake ../ \
+        && make \
+        && cp gcta64 /usr/bin \
+        && ln -s /usr/bin/gcta64 /usr/bin/gcta
+
+FROM debian:bookworm-slim@sha256:4b50eb66f977b4062683ff434ef18ac191da862dbe966961bc11990cf5791a8d AS production
+
+COPY --from=build /lib/x86_64-linux-gnu/libz.so.1* \
+        /lib/x86_64-linux-gnu/libsqlite3.so.0* \
+        /lib/x86_64-linux-gnu/libzstd.so.1* \
+        /lib/x86_64-linux-gnu/libgsl.so.27* \
+        /lib/x86_64-linux-gnu/libgslcblas.so.0* \
+        /lib/x86_64-linux-gnu/libgomp.so.1* \
+        /lib/x86_64-linux-gnu/libm.so.6 \
+        /lib/x86_64-linux-gnu/libc.so.6 \
+        /lib/x86_64-linux-gnu/libdl.so.2 \
+        /lib/x86_64-linux-gnu/libpthread.so.0 \
+        /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 \
+        /lib/x86_64-linux-gnu/
+
+COPY --from=build /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_intel_lp64.so.2 \
+        /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_gnu_thread.so.2 \
+        /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_core.so.2 \
+        /opt/intel/oneapi/mkl/2025.1/lib/intel64/
+
+COPY --from=build /lib64/ld-linux-x86-64.so.2 \
+        /lib64/
+
+COPY --from=build /usr/bin/gcta* \
+        /usr/bin/
+
+WORKDIR /workspace/program/gcta/production
