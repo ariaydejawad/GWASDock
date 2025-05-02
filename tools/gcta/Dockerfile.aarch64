@@ -55,21 +55,29 @@ RUN cd codebase \
         && cp gcta64 /usr/bin \
         && ln -s /usr/bin/gcta64 /usr/bin/gcta
 
-FROM alpine:3.18.12@sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f AS production
-
-COPY --from=build /usr/lib/libsqlite3.so.0* \
+RUN mkdir -p gcta-sharedlibs/apk-installed-libs gcta-sharedlibs/custom-built-libs gcta-executables \
+        && cp -a /usr/lib/libsqlite3.so.0* \
         /usr/lib/libzstd.so.1* \
         /usr/lib/libgsl.so.27* \
         /usr/lib/libgslcblas.so.0* \
         /usr/lib/libgomp.so.1* \
         /usr/lib/libgfortran.so.5* \
         /usr/lib/libgcc_s.so.1 \
+        gcta-sharedlibs/apk-installed-libs/ \
+        && cp -a /usr/include/openblas/lib/libopenblas.so.0 \
+        /usr/include/openblas/lib/libopenblas_armv8p-r0.3.15.so \
+        gcta-sharedlibs/custom-built-libs/ \
+        && cp -a /usr/bin/gcta* gcta-executables/
+
+FROM alpine:3.18.12@sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f AS production
+
+COPY --from=build /workspace/program/gcta/gcta-sharedlibs/apk-installed-libs/ \
         /usr/lib/
 
-COPY --from=build /usr/include/openblas/lib/libopenblas.so.0* \
+COPY --from=build /workspace/program/gcta/gcta-sharedlibs/custom-built-libs/ \
         /usr/include/openblas/lib/
 
-COPY --from=build /usr/bin/gcta* \
+COPY --from=build /workspace/program/gcta/gcta-executables/ \
         /usr/bin/
 
 WORKDIR /workspace/program/gcta/production
