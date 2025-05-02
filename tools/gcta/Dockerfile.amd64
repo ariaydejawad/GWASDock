@@ -50,30 +50,27 @@ RUN cd codebase \
         && cp gcta64 /usr/bin \
         && ln -s /usr/bin/gcta64 /usr/bin/gcta
 
-FROM debian:bookworm-slim@sha256:4b50eb66f977b4062683ff434ef18ac191da862dbe966961bc11990cf5791a8d AS production
-
-COPY --from=build /lib/x86_64-linux-gnu/libz.so.1* \
-        /lib/x86_64-linux-gnu/libsqlite3.so.0* \
-        /lib/x86_64-linux-gnu/libzstd.so.1* \
+RUN mkdir -p gcta-shared-libs/apt-installed-libs gcta-shared-libs/intel-mkl-libs gcta-executables \
+        && cp -a /lib/x86_64-linux-gnu/libsqlite3.so.0* \
         /lib/x86_64-linux-gnu/libgsl.so.27* \
         /lib/x86_64-linux-gnu/libgslcblas.so.0* \
         /lib/x86_64-linux-gnu/libgomp.so.1* \
-        /lib/x86_64-linux-gnu/libm.so.6 \
-        /lib/x86_64-linux-gnu/libc.so.6 \
-        /lib/x86_64-linux-gnu/libdl.so.2 \
-        /lib/x86_64-linux-gnu/libpthread.so.0 \
-        /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 \
-        /lib/x86_64-linux-gnu/
-
-COPY --from=build /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_intel_lp64.so.2 \
+        gcta-shared-libs/apt-installed-libs/ \
+        && cp -a /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_intel_lp64.so.2 \
         /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_gnu_thread.so.2 \
         /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_core.so.2 \
+        gcta-shared-libs/intel-mkl-libs/ \
+        && cp -a /usr/bin/gcta* gcta-executables/
+
+FROM debian:bookworm-slim@sha256:4b50eb66f977b4062683ff434ef18ac191da862dbe966961bc11990cf5791a8d AS production
+
+COPY --from=build /workspace/program/gcta/gcta-shared-libs/apt-installed-libs/ \
+        /lib/x86_64-linux-gnu/
+
+COPY --from=build /workspace/program/gcta/gcta-shared-libs/intel-mkl-libs/ \
         /opt/intel/oneapi/mkl/2025.1/lib/intel64/
 
-COPY --from=build /lib64/ld-linux-x86-64.so.2 \
-        /lib64/
-
-COPY --from=build /usr/bin/gcta* \
+COPY --from=build /workspace/program/gcta/gcta-executables/ \
         /usr/bin/
 
 WORKDIR /workspace/program/gcta/production
