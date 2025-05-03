@@ -21,7 +21,7 @@ RUN apk update && apk add \
 ADD https://github.com/OpenMathLib/OpenBLAS.git#v0.3.15 ./dependencies/openblas
 
 RUN cd dependencies/openblas \
-        && make \
+        && make USE_OPENMP=1 \
         && make install PREFIX="/usr/include/openblas"
 
 ADD https://gitlab.com/libeigen/eigen.git#3.3.7 ./dependencies/eigen
