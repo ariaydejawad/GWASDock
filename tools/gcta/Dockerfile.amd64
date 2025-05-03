@@ -56,7 +56,11 @@ RUN mkdir -p gcta-shared-libs/apt-installed-libs gcta-shared-libs/intel-mkl-libs
         /lib/x86_64-linux-gnu/libgslcblas.so.0* \
         /lib/x86_64-linux-gnu/libgomp.so.1* \
         gcta-shared-libs/apt-installed-libs/ \
-        && cp -a /opt/intel/oneapi/mkl/2025.1/lib/intel64/* \
+        && cp -a /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_intel_lp64.so.2 \
+        /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_gnu_thread.so.2 \
+        /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_core.so.2 \
+        /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_avx2.so.2 \
+        /opt/intel/oneapi/mkl/2025.1/lib/intel64/libmkl_def.so.2 \
         gcta-shared-libs/intel-mkl-libs/ \
         && cp -a /usr/bin/gcta* gcta-executables/
 
