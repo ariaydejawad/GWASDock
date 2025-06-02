@@ -10,6 +10,7 @@ tools/plink/*.txt
 tools/tassel/*.txt
 tools/gapit/gapit-resources
 tools/gapit/*.txt
+tools/gapit/dd-millet-testrun*
 tools/gcta/gcta-resources
 tools/gcta/*.txt
 tools/fastlmm/*.txt
