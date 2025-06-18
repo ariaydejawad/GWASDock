@@ -47,7 +47,11 @@ ENV BOOST_LIB="/usr/include/boost/include" \
         OPENBLAS="/usr/include/openblas" \
         SPECTRA_LIB="/usr/include/spectra/include"
 
+# Thanks to GitHub user @wlan0's solution, support for Apple's 'container' tool has been added for this tool.
+# Previously, Apple's 'container' tool did not support ARM V8.4, which meant that building this image using it would fail reliably.
+# The solution provides support for Apple's 'container' tool, which allows more users to use this tool on Apple's platforms.
 RUN cd codebase \
+        && sed -i 's/-march=native/-march=armv8-a/g' CMakeLists.txt \
         && mkdir -p build \
         && cd build \
         && cmake ../ \
