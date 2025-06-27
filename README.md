@@ -3,20 +3,38 @@
 ## Project Information
 GWASDock is a collection of powerful genome-wide association study (GWAS) tools organized into reproducible docker build images. This project makes it much easier to reproduce GWAS experiments, port GWAS tools onto other computers, and be more productive with GWAS experiments using these tools. The project is an ongoing effort to make using GWAS tools as easy as possible, but its current version – with the working docker images for each GWAS tool – is more than enough to achieve the usability goals set out earlier. To help with the usage of docker, a dedicated **documentation** subdirectory has been created with all the command-line (or shell) commands to use docker, so that the user can easily build these GWAS images, and use them on their computers. The docker documentation for building and using each image for each GWAS tool is included/bundled into a **usage** subdirectory with its name. For example: **GAPIT** (Wang & Zhang, 2021) has a dedicated user's manual under the **documentation/usage/gapit-container** subdirectory from the project root – which is where this README.md file is located.
 
+## Usage documentation
+The usage documentation for each tool describes how to reliably reproduce the container of each tool from scratch. To reliably reproduce the container of each tool from scratch, the user needs to: (1) build the image of each tool's container using `docker buildx build` or `docker build` using the provided Dockerfiles, and (2) run each tool as a standalone container either interactively or non-interactively using the `docker run` commands. Note: there are many variations to the way that you can run these containers, so feel free to experiment with non-interactive methods of using these containers as part of your workflow. To get help with learning Docker, and what it can do, visit the official Docker reference documentation here: https://docs.docker.com/.
+
+For each tool, the usage documenation is called **README.md**, and is located in its appropriate subdirectory under the **documentation/usage** project directory. The usage documentation comes in the form of a Markdown document that is automatically rendered by GitHub when you visit the respective tool's **documentation/usage** directory.
+
+The usage documentation for each GWAS tool in this toolkit is located here:
+- **PLINK:** [documentation/usage/plink-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/plink-container)
+- **GCTA:** [documentation/usage/gcta-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/gcta-container)
+	- **Computer Architecture Notes:** **GCTA** is the only tool in the toolkit currently that requires the use of a different Dockerfile for building and using it on a user's computer depending on whether they are using either a `linux/amd64` or `linux/aarch64` system. The usage documentation describes this key distinction, and provides the respective `docker buildx build` and `docker container run` commands for each architecture.
+		- If you need to find out which computer architecture your computer supports, run `uname -a` to get this information. Based on this information, you will need to select the correct Dockerfile to use for building your desired image.
+- **TASSEL:** [documentation/usage/tassel-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/tassel-container)
+- **GAPIT:** [documentation/usage/gapit-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/gapit-container)
+
 ## Supported GWAS Tools
+Since each GWAS tool comes with its own set of reference manuals, each GWAS tool's manual has been linked under its entry in the "currently supported GWAS tools" list that follows. You can use these manuals to better understand how to use each tool either interactively or non-interactively.
+
 The currently supported GWAS tools are:
 - **PLINK** (versions 1.9 and 2.0) by Chang et al. (2015) (DOI: [10.1186/s13742-015-0047-8](https://doi.org/10.1186/s13742-015-0047-8))
 	- The original **PLINK** (version 1.0) was developed by Purcell et al. (2007) (DOI: [10.1086/519795](https://doi.org/10.1086/519795))
+	- **PLINK Usage Manual:** The website that hosts the **PLINK** usage manual is located here: https://www.cog-genomics.org/plink/1.9/general_usage.
 - **GCTA** (version 1.94.1) by Yang et al. (2011) (DOI: [10.1016/j.ajhg.2010.11.011](https://doi.org/10.1016/j.ajhg.2010.11.011))
+	- **GCTA Usage Manual:** The website that hosts the **GCTA** usage manual is located here: https://yanglab.westlake.edu.cn/software/gcta/#Overview.
 - **GAPIT** (version 3) by Wang & Zhang (2021) (DOI: [10.1016/j.gpb.2021.08.005](https://doi.org/10.1016/j.gpb.2021.08.005))
 	- Version 2 of **GAPIT** was developed by Tang et al. (2016) (DOI: [10.3835/plantgenome2015.11.0120](https://doi.org/10.3835/plantgenome2015.11.0120))
 	- Version 1 (the original) of **GAPIT** was developed by Lipka et al. (2012) (DOI: [10.1093/bioinformatics/bts444](https://doi.org/10.1093/bioinformatics/bts444))
+	- **GAPIT Usage Manual:** The website that hosts the usage manual of **GAPIT** is located here: https://github.com/jiabowang/GAPIT/blob/master/Documents/gapit_help_document.pdf.
 - **TASSEL** (version 5.2.95) by Bradbury et al. (2007) (DOI: [10.1093/bioinformatics/btm308](https://doi.org/10.1093/bioinformatics/btm308))
+	- **Note on TASSEL:** Only the command-line interface (CLI) for **TASSEL** is supported. The graphical user interface (GUI) version of **TASSEL** is less capable and stable than the CLI version, and it does not provide a scriptable interface to be used non-interactively as part of larger bioinformatics workflows. It is strongly recommended that you use the CLI version of **TASSEL** in any case, but it is nearly impossible to use the GUI version by design in the provided **TASSEL** container, since the user is expected to be familiar with the TASSEL CLI.
+	- **TASSEL Usage Manual:** The website that hosts the **TASSEL** usage manual is located here: https://bitbucket.org/tasseladmin/tassel-5-source/wiki/UserManual.
 - **FaST-LMM** (version 0.6.12) by Lippert et al. (2011) (DOI: [10.1038/nmeth.1681](https://doi.org/10.1038/nmeth.1681))
 	- GWASDock supports the following fork/implementation of FaST-LMM by Carl Kadie (Microsoft): [FaST-LMM](https://github.com/fastlmm/FaST-LMM)
-
-## Computer Architecture Notes
-Each tool – except for **GCTA** – has an equivalent **aarch64** and **amd64** base image, and the user can use the same commands to build and use these GWAS tools in their docker containers on their GNU/Linux computers. **GCTA** requires a slight tweak to the build commands to build and run successfully on the user's computer, and the user manuals reflect and document that key detail. Despite this distinction, **GCTA** will perform and work identically as an isolated GWAS container post-build, so there is no reason to choose the **amd64** version over the **aarch64** version; just build and use the version appropriate for your computer.
+	- **FaST-LMM:** The usage documentation for **FaST-LMM** is located here: https://fastlmm.github.io/FaST-LMM/.
 
 ## System Requirements
 A modest GNU/Linux computer is more than ample to use these tools. These recommended technical specifications are not exhaustive, and the user is always encouraged to get access to as much hardware horsepower they can get access to. Out of all the GWAS tools, **GAPIT** by Wang and Zhang (2021) is the most memory intensive, so the user is advised to use a GNU/Linux computer with access to more than 32 GiB of memory to be able to use **GAPIT** as it was designed/intended. Considering this, here are the recommended system specifications (hardware and software):
