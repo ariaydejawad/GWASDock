@@ -3,20 +3,20 @@
 ## Project Information
 GWASDock is a collection of powerful genome-wide association study (GWAS) tools organized into reproducible docker build images. This project makes it much easier to reproduce GWAS experiments, port GWAS tools onto other computers, and be more productive with GWAS experiments using these tools. The project is an ongoing effort to make using GWAS tools as easy as possible, but its current version – with the working docker images for each GWAS tool – is more than enough to achieve the usability goals set out earlier. To help with the usage of docker, a dedicated **documentation** subdirectory has been created with all the command-line (or shell) commands to use docker, so that the user can easily build these GWAS images, and use them on their computers. The docker documentation for building and using each image for each GWAS tool is included/bundled into a **usage** subdirectory with its name. For example: **GAPIT** (Wang & Zhang, 2021) has a dedicated user's manual under the **documentation/usage/gapit-container** subdirectory from the project root – which is where this README.md file is located.
 
-## Usage documentation
+## GWASDock Usage Documentation
 The usage documentation for each tool describes how to reliably reproduce the container of each tool from scratch. To reliably reproduce the container of each tool from scratch, the user needs to: (1) build the image of each tool's container using `docker buildx build` or `docker build` using the provided Dockerfiles, and (2) run each tool as a standalone container either interactively or non-interactively using the `docker run` commands. Note: there are many variations to the way that you can run these containers, so feel free to experiment with non-interactive methods of using these containers as part of your workflow. To get help with learning Docker, and what it can do, visit the official Docker reference documentation here: https://docs.docker.com/.
 
 For each tool, the usage documenation is called **README.md**, and is located in its appropriate subdirectory under the **documentation/usage** project directory. The usage documentation comes in the form of a Markdown document that is automatically rendered by GitHub when you visit the respective tool's **documentation/usage** directory.
 
 The usage documentation for each GWAS tool in this toolkit is located here:
-- **PLINK:** [documentation/usage/plink-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/plink-container)
-- **GCTA:** [documentation/usage/gcta-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/gcta-container)
+- **PLINK Container:** [documentation/usage/plink-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/plink-container)
+- **GCTA Container:** [documentation/usage/gcta-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/gcta-container)
 	- **Computer Architecture Notes:** **GCTA** is the only tool in the toolkit currently that requires the use of a different Dockerfile for building and using it on a user's computer depending on whether they are using either a `linux/amd64` or `linux/aarch64` system. The usage documentation describes this key distinction, and provides the respective `docker buildx build` and `docker container run` commands for each architecture.
 		- If you need to find out which computer architecture your computer supports, run `uname -a` to get this information. Based on this information, you will need to select the correct Dockerfile to use for building your desired image.
-- **TASSEL:** [documentation/usage/tassel-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/tassel-container)
-- **GAPIT:** [documentation/usage/gapit-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/gapit-container)
+- **TASSEL Container:** [documentation/usage/tassel-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/tassel-container)
+- **GAPIT Container:** [documentation/usage/gapit-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/gapit-container)
 
-## Supported GWAS Tools
+## Currently Supported GWAS Tools
 Since each GWAS tool comes with its own set of reference manuals, each GWAS tool's manual has been linked under its entry in the "currently supported GWAS tools" list that follows. You can use these manuals to better understand how to use each tool either interactively or non-interactively.
 
 The currently supported GWAS tools are:
