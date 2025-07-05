@@ -10,7 +10,7 @@ This document provides instructions for building and using a Docker container fo
 4. [Verifying the Build](#verifying-the-build)
 5. [Running the Container](#running-the-container)
 6. [Verifying Container Environment](#verifying-container-environment)
-7. [Using FaST-LMM in the Container](#using-fastlmm-in-the-container)
+7. [Using FaST-LMM in the Container](#using-fast-lmm-in-the-container)
 8. [Exiting the Container](#exiting-the-container)
 
 ## Prerequisites
