@@ -15,6 +15,7 @@ The usage documentation for each GWAS tool in this toolkit is located here:
 		- If you need to find out which computer architecture your computer supports, run `uname -a` to get this information. Based on this information, you will need to select the correct Dockerfile to use for building your desired image.
 - **TASSEL Container:** [documentation/usage/tassel-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/tassel-container)
 - **GAPIT Container:** [documentation/usage/gapit-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/gapit-container)
+- **FaST-LMM Container:** [documentation/usage/fastlmm-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/fastlmm-container)
 
 ## Currently Supported GWAS Tools
 Since each GWAS tool comes with its own set of reference manuals, each GWAS tool's manual has been linked under its entry in the "currently supported GWAS tools" list that follows. You can use these manuals to better understand how to use each tool either interactively or non-interactively.
