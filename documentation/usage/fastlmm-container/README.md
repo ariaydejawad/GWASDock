@@ -89,7 +89,7 @@ Parameters explained:
 - `-it`: Allocates an interactive terminal for the container
 - `--mount type=bind,src=<your-input-folder-path>,dst=/workspace/program/fastlmm/input`: Creates a bind mount for input data inside the FaST-LMM container based on where your input data files are located on your system.
 - `--mount type=bind,src=<your-output-folder-path>,dst=/workspace/program/fastlmm/output`: Creates a bind mount for output data inside the FaST-LMM container based on where you want to store your FaST-LMM output analysis files on your system.
-- `--mount type=bind,src=<your-scripts-folder-path>,dst=/workspace/program/fastlmm/user-scripts`: Creates a bind mount for user Python scripts inside the FaST-LMM container based on where you have your faST-LMM Python scripts/programs on your system.
+- `--mount type=bind,src=<your-scripts-folder-path>,dst=/workspace/program/fastlmm/user-scripts`: Creates a bind mount for user Python scripts inside the FaST-LMM container based on where you have your FaST-LMM Python scripts/programs on your system.
 - `fastlmm-container:dev`: The name and tag of the container to run
 - `/bin/bash`: The command to execute (starts a bash shell)
 
