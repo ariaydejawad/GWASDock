@@ -24,7 +24,7 @@ This folder contains scripts and instructions to perform GWAS analysis using GAP
 
 ### Step 1: Prepare Genotype Data 
 
-The millet dataset provides genotype data in PLINK binary format (.bed, .bim, .fam). To obtain genotype data in HapMap format (`millet.hmp.txt`), follow the instructions from Step 1 to Step 3 in the README.md(../tassel/README.md) located in the TASSEL subdirectory, which is at the same directory level as GAPIT.
+The millet dataset provides genotype data in PLINK binary format (.bed, .bim, .fam). To obtain genotype data in HapMap format (`millet.hmp.txt`), follow the instructions from Step 1 to Step 3 in the [README.md](../tassel/README.md) located in the TASSEL subdirectory, which is at the same directory level as GAPIT.
 
 ### Step 2: Set Up Environment and Start Container
 ```bash
