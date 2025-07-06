@@ -24,7 +24,7 @@ This folder contains scripts and instructions to perform GWAS analysis using GAP
 
 ### Step 1: Prepare Genotype Data 
 
-The millet dataset provides genotype data in PLINK binary format (.bed, .bim, .fam). To obtain genotype data in HapMap format (`millet.hmp.txt`), follow the instructions from Step 1 to Step 3 in the README.md located in the TASSEL subdirectory, which is at the same directory level as GAPIT.
+The millet dataset provides genotype data in PLINK binary format (.bed, .bim, .fam). To obtain genotype data in HapMap format (`millet.hmp.txt`), follow the instructions from Step 1 to Step 3 in the README.md(../tassel/README.md) located in the TASSEL subdirectory, which is at the same directory level as GAPIT.
 
 ### Step 2: Set Up Environment and Start Container
 ```bash
@@ -54,13 +54,13 @@ Run the GWAS analysis using:
 ```bash
 Rscript run_gapit_gwas.R
 ```
-This will generate the results file `GAPIT.Association.GWAS_Results.GLM.Pheno(NYC).csv` in the `output/` directory.
+This will generate the results file `GAPIT.Association.GWAS_Results.GLM.TSLL.csv`.
 
 ### Step 4: Review Results
 
 Results are saved in the `output/` directory.
 
-- `GAPIT.Association.GWAS_Results.GLM.Pheno(NYC).csv`: Contains comprehensivew GWAS analysis results.
+- `GAPIT.Association.GWAS_Results.GLM.TSLL.csv`: Contains comprehensivew GWAS analysis results.
 
 Please verify the output files to confirm the analysis completed successfully.
 
