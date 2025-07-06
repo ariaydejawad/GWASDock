@@ -12,14 +12,17 @@ usage() {
     echo "Required arguments:"
     echo "  -i <input_dir>     Path to directory containing input files"
     echo "  -o <output_dir>    Path to directory for output files"
-    echo "  -f <input_format>  Input format: 'text' (for .ped/.map) or 'binary' (for .bed/.bim/.fam)"
+    echo "  -f <input_format>  Input format: 'text' (for .ped/.map), 'binary' (for .bed/.bim/.fam), or 'vcf' (for .vcf)"
     echo ""
     echo "Optional arguments:"
     echo "  -n <base_name>     Base name for input files (default: extracted from first .ped/.bed file)"
-    echo "  -t <target_format> Target format: 'vcf', 'oxford', or 'both' (default: both)"
+    echo "  -t <target_format> Target format: 'vcf', 'oxford', 'binary', or 'both' (default: auto)"
     echo "  -h                 Show this help message"
     echo ""
     echo "Examples:"
+    echo "  # Convert VCF files to binary PLINK format"
+    echo "  $0 -i /path/to/input -o /path/to/output -f vcf"
+    echo ""
     echo "  # Convert text PLINK files to VCF and Oxford formats"
     echo "  $0 -i /path/to/input -o /path/to/output -f text"
     echo ""
@@ -35,7 +38,7 @@ INPUT_DIR=""
 OUTPUT_DIR=""
 INPUT_FORMAT=""
 BASE_NAME=""
-TARGET_FORMAT="both"
+TARGET_FORMAT="auto"
 
 # Parse command line arguments
 while getopts "i:o:f:n:t:h" opt; do
@@ -75,14 +78,14 @@ if [[ -z "$INPUT_DIR" || -z "$OUTPUT_DIR" || -z "$INPUT_FORMAT" ]]; then
 fi
 
 # Validate input format
-if [[ "$INPUT_FORMAT" != "text" && "$INPUT_FORMAT" != "binary" ]]; then
-    echo "Error: Input format must be 'text' or 'binary'"
+if [[ "$INPUT_FORMAT" != "text" && "$INPUT_FORMAT" != "binary" && "$INPUT_FORMAT" != "vcf" ]]; then
+    echo "Error: Input format must be 'text', 'binary', or 'vcf'"
     exit 1
 fi
 
 # Validate target format
-if [[ "$TARGET_FORMAT" != "vcf" && "$TARGET_FORMAT" != "oxford" && "$TARGET_FORMAT" != "both" ]]; then
-    echo "Error: Target format must be 'vcf', 'oxford', or 'both'"
+if [[ "$TARGET_FORMAT" != "vcf" && "$TARGET_FORMAT" != "oxford" && "$TARGET_FORMAT" != "binary" && "$TARGET_FORMAT" != "both" && "$TARGET_FORMAT" != "auto" ]]; then
+    echo "Error: Target format must be 'vcf', 'oxford', 'binary', 'both', or 'auto'"
     exit 1
 fi
 
@@ -110,7 +113,7 @@ if [[ -z "$BASE_NAME" ]]; then
             echo "Error: No .ped files found in input directory"
             exit 1
         fi
-    else
+    elif [[ "$INPUT_FORMAT" == "binary" ]]; then
         # Look for .bed files
         BED_FILE=$(find "$INPUT_DIR" -name "*.bed" -type f | head -1)
         if [[ -n "$BED_FILE" ]]; then
@@ -119,10 +122,32 @@ if [[ -z "$BASE_NAME" ]]; then
             echo "Error: No .bed files found in input directory"
             exit 1
         fi
+    else
+        # Look for .vcf files
+        VCF_FILE=$(find "$INPUT_DIR" -name "*.vcf" -type f | head -1)
+        if [[ -n "$VCF_FILE" ]]; then
+            BASE_NAME=$(basename "$VCF_FILE" .vcf)
+        else
+            echo "Error: No .vcf files found in input directory"
+            exit 1
+        fi
     fi
 fi
 
-echo "=== PLINK Data Conversion Script ==="
+# Set intelligent defaults for target format if auto
+if [[ "$TARGET_FORMAT" == "auto" ]]; then
+    if [[ "$INPUT_FORMAT" == "vcf" ]]; then
+        TARGET_FORMAT="binary"
+        echo "Auto-selected target format: binary (VCF → Binary PLINK)"
+    elif [[ "$INPUT_FORMAT" == "binary" ]]; then
+        TARGET_FORMAT="both"
+        echo "Auto-selected target format: both VCF and Oxford (Binary PLINK → VCF + Oxford)"
+    else
+        TARGET_FORMAT="both"
+        echo "Auto-selected target format: both VCF and Oxford (Text PLINK → VCF + Oxford)"
+    fi
+    echo ""
+fi
 echo "Input directory: $INPUT_DIR"
 echo "Output directory: $OUTPUT_DIR"
 echo "Input format: $INPUT_FORMAT"
@@ -163,7 +188,7 @@ run_plink_command() {
     echo ""
 }
 
-# Step 1: Convert to binary format if input is text
+# Step 1: Convert to binary format if input is text or VCF
 if [[ "$INPUT_FORMAT" == "text" ]]; then
     echo "=== Step 1: Converting text PLINK to binary PLINK ==="
     BINARY_BASE_NAME="${BASE_NAME}_binary"
@@ -171,6 +196,13 @@ if [[ "$INPUT_FORMAT" == "text" ]]; then
     run_plink_command \
         "plink --file $CONTAINER_INPUT_DIR/$BASE_NAME --make-bed --out $CONTAINER_OUTPUT_DIR/$BINARY_BASE_NAME" \
         "Text to binary PLINK conversion"
+elif [[ "$INPUT_FORMAT" == "vcf" ]]; then
+    echo "=== Step 1: Converting VCF to binary PLINK ==="
+    BINARY_BASE_NAME="${BASE_NAME}_binary"
+
+    run_plink_command \
+        "plink --vcf $CONTAINER_INPUT_DIR/$BASE_NAME.vcf --make-bed --out $CONTAINER_OUTPUT_DIR/$BINARY_BASE_NAME" \
+        "VCF to binary PLINK conversion"
 else
     # If input is already binary, just use the original base name
     BINARY_BASE_NAME="$BASE_NAME"
@@ -178,11 +210,15 @@ else
     echo ""
 fi
 
-# Step 2: Convert to target formats
-if [[ "$TARGET_FORMAT" == "vcf" || "$TARGET_FORMAT" == "both" ]]; then
+# Step 2: Convert to target formats (skip if target is binary and we just created binary)
+if [[ "$TARGET_FORMAT" == "binary" ]]; then
+    echo "=== Conversion Complete! ==="
+    echo "Binary PLINK files created successfully!"
+    echo ""
+elif [[ "$TARGET_FORMAT" == "vcf" || "$TARGET_FORMAT" == "both" ]]; then
     echo "=== Converting binary PLINK to VCF format ==="
 
-    if [[ "$INPUT_FORMAT" == "text" ]]; then
+    if [[ "$INPUT_FORMAT" == "text" || "$INPUT_FORMAT" == "vcf" ]]; then
         # Use the binary files we just created
         run_plink_command \
             "plink --bfile $CONTAINER_OUTPUT_DIR/$BINARY_BASE_NAME --recode vcf --out $CONTAINER_OUTPUT_DIR/${BASE_NAME}_vcf" \
@@ -198,7 +234,7 @@ fi
 if [[ "$TARGET_FORMAT" == "oxford" || "$TARGET_FORMAT" == "both" ]]; then
     echo "=== Converting binary PLINK to Oxford format ==="
 
-    if [[ "$INPUT_FORMAT" == "text" ]]; then
+    if [[ "$INPUT_FORMAT" == "text" || "$INPUT_FORMAT" == "vcf" ]]; then
         # Use the binary files we just created
         run_plink_command \
             "plink --bfile $CONTAINER_OUTPUT_DIR/$BINARY_BASE_NAME --recode oxford --out $CONTAINER_OUTPUT_DIR/${BASE_NAME}_oxford" \
@@ -211,10 +247,12 @@ if [[ "$TARGET_FORMAT" == "oxford" || "$TARGET_FORMAT" == "both" ]]; then
     fi
 fi
 
-echo "=== Conversion Complete! ==="
-echo "All output files have been saved to: $OUTPUT_DIR"
-echo ""
-echo "Generated files:"
-ls -la "$OUTPUT_DIR"
-echo ""
+if [[ "$TARGET_FORMAT" != "binary" ]]; then
+    echo "=== Conversion Complete! ==="
+    echo "All output files have been saved to: $OUTPUT_DIR"
+    echo ""
+    echo "Generated files:"
+    ls -la "$OUTPUT_DIR"
+    echo ""
+fi
 echo "🎉 PLINK data conversion completed successfully!"
