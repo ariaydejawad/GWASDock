@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# PLINK Data Format Conversion Script
-# This script automates the process of converting genomic data formats using PLINK in Docker
+# Genomic Data Format Conversion Script
+# This script automates the process of converting genomic data formats using PLINK and TASSEL in Docker
 
 set -e  # Exit on any error
 
@@ -12,7 +12,7 @@ usage() {
     echo "Required arguments:"
     echo "  -i <input_dir>     Path to directory containing input files"
     echo "  -o <output_dir>    Path to directory for output files"
-    echo "  -f <input_format>  Input format: 'text' (for .ped/.map), 'binary' (for .bed/.bim/.fam), or 'vcf' (for .vcf)"
+    echo "  -f <input_format>  Input format: 'text' (for .ped/.map), 'binary' (for .bed/.bim/.fam), 'vcf' (for .vcf), or 'hapmap' (for .hmp.txt)"
     echo ""
     echo "Optional arguments:"
     echo "  -n <base_name>     Base name for input files (default: extracted from first .ped/.bed file)"
@@ -39,9 +39,10 @@ OUTPUT_DIR=""
 INPUT_FORMAT=""
 BASE_NAME=""
 TARGET_FORMAT="auto"
+TOOL="auto"
 
 # Parse command line arguments
-while getopts "i:o:f:n:t:h" opt; do
+while getopts "i:o:f:n:t:T:h" opt; do
     case $opt in
         i)
             INPUT_DIR="$OPTARG"
@@ -57,6 +58,9 @@ while getopts "i:o:f:n:t:h" opt; do
             ;;
         t)
             TARGET_FORMAT="$OPTARG"
+            ;;
+        T)
+            TOOL="$OPTARG"
             ;;
         h)
             usage
@@ -78,14 +82,20 @@ if [[ -z "$INPUT_DIR" || -z "$OUTPUT_DIR" || -z "$INPUT_FORMAT" ]]; then
 fi
 
 # Validate input format
-if [[ "$INPUT_FORMAT" != "text" && "$INPUT_FORMAT" != "binary" && "$INPUT_FORMAT" != "vcf" ]]; then
-    echo "Error: Input format must be 'text', 'binary', or 'vcf'"
+if [[ "$INPUT_FORMAT" != "text" && "$INPUT_FORMAT" != "binary" && "$INPUT_FORMAT" != "vcf" && "$INPUT_FORMAT" != "hapmap" ]]; then
+    echo "Error: Input format must be 'text', 'binary', 'vcf', or 'hapmap'"
     exit 1
 fi
 
 # Validate target format
-if [[ "$TARGET_FORMAT" != "vcf" && "$TARGET_FORMAT" != "oxford" && "$TARGET_FORMAT" != "binary" && "$TARGET_FORMAT" != "both" && "$TARGET_FORMAT" != "auto" ]]; then
-    echo "Error: Target format must be 'vcf', 'oxford', 'binary', 'both', or 'auto'"
+if [[ "$TARGET_FORMAT" != "vcf" && "$TARGET_FORMAT" != "oxford" && "$TARGET_FORMAT" != "binary" && "$TARGET_FORMAT" != "hapmap" && "$TARGET_FORMAT" != "both" && "$TARGET_FORMAT" != "auto" ]]; then
+    echo "Error: Target format must be 'vcf', 'oxford', 'binary', 'hapmap', 'both', or 'auto'"
+    exit 1
+fi
+
+# Validate tool
+if [[ "$TOOL" != "plink" && "$TOOL" != "tassel" && "$TOOL" != "auto" ]]; then
+    echo "Error: Tool must be 'plink', 'tassel', or 'auto'"
     exit 1
 fi
 
@@ -122,13 +132,22 @@ if [[ -z "$BASE_NAME" ]]; then
             echo "Error: No .bed files found in input directory"
             exit 1
         fi
-    else
+    elif [[ "$INPUT_FORMAT" == "vcf" ]]; then
         # Look for .vcf files
         VCF_FILE=$(find "$INPUT_DIR" -name "*.vcf" -type f | head -1)
         if [[ -n "$VCF_FILE" ]]; then
             BASE_NAME=$(basename "$VCF_FILE" .vcf)
         else
             echo "Error: No .vcf files found in input directory"
+            exit 1
+        fi
+    else
+        # Look for .hmp.txt files (HapMap format)
+        HAPMAP_FILE=$(find "$INPUT_DIR" -name "*.hmp.txt" -type f | head -1)
+        if [[ -n "$HAPMAP_FILE" ]]; then
+            BASE_NAME=$(basename "$HAPMAP_FILE" .hmp.txt)
+        else
+            echo "Error: No .hmp.txt files found in input directory"
             exit 1
         fi
     fi
@@ -142,11 +161,42 @@ if [[ "$TARGET_FORMAT" == "auto" ]]; then
     elif [[ "$INPUT_FORMAT" == "binary" ]]; then
         TARGET_FORMAT="both"
         echo "Auto-selected target format: both VCF and Oxford (Binary PLINK → VCF + Oxford)"
+    elif [[ "$INPUT_FORMAT" == "hapmap" ]]; then
+        TARGET_FORMAT="vcf"
+        echo "Auto-selected target format: vcf (HapMap → VCF)"
     else
         TARGET_FORMAT="both"
         echo "Auto-selected target format: both VCF and Oxford (Text PLINK → VCF + Oxford)"
     fi
     echo ""
+fi
+
+# Set intelligent defaults for tool if auto (HapMap handling takes priority)
+if [[ "$TOOL" == "auto" ]]; then
+    if [[ "$INPUT_FORMAT" == "hapmap" || "$TARGET_FORMAT" == "hapmap" ]]; then
+        TOOL="tassel"
+        echo "Auto-selected tool: TASSEL (required for HapMap format handling)"
+    else
+        TOOL="plink"
+        echo "Auto-selected tool: PLINK"
+    fi
+    echo ""
+fi
+
+# Validate tool/format compatibility
+if [[ "$TARGET_FORMAT" == "hapmap" && "$TOOL" != "tassel" ]]; then
+    echo "Error: HapMap format conversion requires TASSEL. Use -T tassel or let auto-selection handle it."
+    exit 1
+fi
+
+if [[ "$INPUT_FORMAT" == "hapmap" && "$TOOL" != "tassel" ]]; then
+    echo "Error: HapMap input format requires TASSEL. Use -T tassel or let auto-selection handle it."
+    exit 1
+fi
+
+if [[ "$INPUT_FORMAT" == "vcf" && "$TOOL" == "tassel" ]]; then
+    echo "Error: VCF input is not supported with TASSEL. Use PLINK for VCF conversions."
+    exit 1
 fi
 echo "Input directory: $INPUT_DIR"
 echo "Output directory: $OUTPUT_DIR"
@@ -155,15 +205,24 @@ echo "Base name: $BASE_NAME"
 echo "Target format: $TARGET_FORMAT"
 echo ""
 
-# Navigate to PLINK tools directory
-echo "Navigating to PLINK tools directory..."
-cd ../../tools/plink
+# Navigate to tools directory and build appropriate Docker image
+if [[ "$TOOL" == "plink" ]]; then
+    echo "Navigating to PLINK tools directory..."
+    cd ../../tools/plink
 
-# Build PLINK Docker image
-echo "Building PLINK Docker image..."
-docker buildx build --tag plink:dev --iidfile plink_iid.txt .
+    echo "Building PLINK Docker image..."
+    docker buildx build --tag plink:dev --iidfile plink_iid.txt .
+    echo "PLINK Docker image built successfully!"
 
-echo "PLINK Docker image built successfully!"
+elif [[ "$TOOL" == "tassel" ]]; then
+    echo "Navigating to TASSEL tools directory..."
+    cd ../../tools/tassel
+
+    echo "Building TASSEL Docker image..."
+    docker buildx build --tag tassel:dev --iidfile tassel_iid.txt .
+    echo "TASSEL Docker image built successfully!"
+fi
+
 echo ""
 
 # Define container paths
@@ -188,7 +247,74 @@ run_plink_command() {
     echo ""
 }
 
-# Step 1: Convert to binary format if input is text or VCF
+# Function to run TASSEL commands in container
+run_tassel_command() {
+    local cmd="$1"
+    local description="$2"
+
+    echo "Running: $description"
+    echo "Command: $cmd"
+
+    docker container run --rm \
+        --mount type=bind,src="$INPUT_DIR",dst="/workspace/program/tassel/production/data/",ro \
+        --mount type=bind,src="$OUTPUT_DIR",dst="/workspace/program/tassel/production/data/converted-datasets" \
+        tassel:dev \
+        $cmd
+
+    echo "✓ $description completed successfully!"
+    echo ""
+}
+
+# Handle TASSEL workflow (HapMap conversions)
+if [[ "$TOOL" == "tassel" ]]; then
+
+    # Text PLINK to HapMap conversion
+    if [[ "$INPUT_FORMAT" == "text" && "$TARGET_FORMAT" == "hapmap" ]]; then
+        echo "=== Converting Text PLINK to HapMap format using TASSEL ==="
+
+        run_tassel_command \
+            "./run_pipeline.pl -plink -ped data/$BASE_NAME.ped -map data/$BASE_NAME.map -export data/converted-datasets/$BASE_NAME -exportType Hapmap" \
+            "Text PLINK to HapMap conversion"
+
+    # HapMap to other formats conversion
+    elif [[ "$INPUT_FORMAT" == "hapmap" ]]; then
+        echo "=== Converting HapMap to $TARGET_FORMAT format using TASSEL ==="
+
+        case "$TARGET_FORMAT" in
+            "vcf")
+                run_tassel_command \
+                    "./run_pipeline.pl -h data/$BASE_NAME.hmp.txt -export data/converted-datasets/${BASE_NAME}_vcf -exportType VCF" \
+                    "HapMap to VCF conversion"
+                ;;
+            "binary")
+                run_tassel_command \
+                    "./run_pipeline.pl -h data/$BASE_NAME.hmp.txt -export data/converted-datasets/${BASE_NAME}_plink -exportType Plink" \
+                    "HapMap to PLINK conversion"
+                ;;
+            "both")
+                run_tassel_command \
+                    "./run_pipeline.pl -h data/$BASE_NAME.hmp.txt -export data/converted-datasets/${BASE_NAME}_plink -exportType Plink && ./run_pipeline.pl -h data/$BASE_NAME.hmp.txt -export data/converted-datasets/${BASE_NAME}_vcf -exportType VCF" \
+                    "HapMap to PLINK and VCF conversion"
+                ;;
+            *)
+                echo "Error: Unsupported target format '$TARGET_FORMAT' for HapMap input with TASSEL"
+                exit 1
+                ;;
+        esac
+    else
+        echo "Error: TASSEL workflow not implemented for input format '$INPUT_FORMAT' to target format '$TARGET_FORMAT'"
+        exit 1
+    fi
+
+    echo "=== Conversion Complete! ==="
+    echo "TASSEL conversion completed successfully!"
+    echo ""
+    echo "Generated files:"
+    ls -la "$OUTPUT_DIR"
+    echo ""
+    echo "🎉 TASSEL data conversion completed successfully!"
+    exit 0
+fi
 if [[ "$INPUT_FORMAT" == "text" ]]; then
     echo "=== Step 1: Converting text PLINK to binary PLINK ==="
     BINARY_BASE_NAME="${BASE_NAME}_binary"
