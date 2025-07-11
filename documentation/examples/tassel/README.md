@@ -23,14 +23,26 @@ This folder contains scripts and instructions to perform GWAS analysis using TAS
 
 ## Usage
 
-### Step 1: Prepare Genotype Data 
-The millet dataset provides genotype data in PLINK binary format (.bed, .bim, .fam). Use the following PLINK command to convert these to PLINK's traditional text-based formats (.map, .ped):
-```bash
-plink --bfile 827millet --recode --out millet
-```
-This command generates millet.map and millet.ped files, which are required for TASSEL GWAS analysis.
+### Step 1: Prepare Genotype Data
 
-### Step 2: Set Up Environment and Start Container
+The millet dataset provides genotype data in PLINK binary format (.bed, .bim, .fam). Use the `data_converter.sh` script in the [source/shell](../../../source/shell/) directory to convert this into TASSEL-compatible Hapmap format.
+
+Ensure Docker is running. Navigate to the shell directory and execute the following command to convert the genotype data into HapMap format (.hmp.txt) :
+
+```bash
+./data_converter.sh
+-i /Users/yourusername/dataset/input
+-o /Users/yourusername/dataset/output 
+-n 827millet 
+-f binary 
+-t hapmap 
+```
+Executing this command generates the `827millet_hapmap.hmp.txt` file, which is required for TASSEL GWAS analysis.
+
+**Note:** Replace `/Users/yourusername/dataset/input `and `/Users/yourusername/dataset/output` with your local paths. 
+
+### Step 2: Setup Environment and Launch Container
+Navigate to the directory containing the `setup_tassel_gwasdock.sh` script and run one of the following commands to enter the TASSEL container.
 
 ```bash
 bash setup_tassel_gwasdock.sh
@@ -44,28 +56,20 @@ This process clones the repository, builds the Docker image, launches a TASSEL c
 
 **Note:** Modify the paths (`PROJECT_ROOT_DIR`, `LOCAL_INPUT_DIR`,`LOCAL_OUTPUT_DIR`)  in the script to match your local directory structure.
 
-### Step 3: Convert Genotype Data 
+### Step 3:  Run GWAS Analysis 
 
-Within the container, navigate to the TASSEL scripts directory `production`:
+Within the container, ensure you are in the `production` directory. If you are not, navigate to the TASSEL scripts directory `production`:
 ```bash
 cd production
 ```
-Execute the following command to convert the .ped and .map files into .hmp.txt format:
-
-```bash
-./run_pipeline.pl -plink -ped ../input/millet.ped -map ../input/millet.map -export ../input/millet -exportType Hapmap
-```
-
-### Step 4: Run GWAS Analysis
 
 Run the GWAS analysis using:
 ```bash
-./run_pipeline.pl -debug -fork1 -h ../input/millet.hmp.txt -fork2 -importGuess ../input/TSLL.txt -combine3 -input1 -input2 -intersect -glm -export ../output/Tassel_result.txt
+./run_pipeline.pl -debug -fork1 -h ../input/827millet_hapmap.hmp.txt -fork2 -importGuess ../input/TSLL.txt -combine3 -input1 -input2 -intersect -glm -export ../output/Tassel_result.txt
 ```
 This will generate the results file `Tassel_result1.txt` in the `output/` directory.
 
-
-### Step 5: Get Top20 SNPs
+### Step 4: Get Top20 SNPs
 To extract the top 20 SNPs with the smallest P-values, execute:
 
 ```bash

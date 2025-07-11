@@ -21,7 +21,8 @@ This folder contains scripts and instructions to perform GWAS analysis using PLI
 
 ## Usage
 
-### Step 1: Set Up Environment and Start Container
+### Step 1: Setup Environment and Launch Container
+Navigate to the directory containing the `setup_plink_gwasdock.sh` script and run one of the following commands to enter the PLINK container.
 
 ```bash
 bash setup_plink_gwasdock.sh
@@ -36,27 +37,26 @@ This clones the repository, builds the Docker image, launches a PLINK container 
 
 ### Step 2: Run GWAS Analysis
 
-Inside the container, run:
+Within the container, execute the following command:
 
 ```bash
 plink --bfile input/827millet --pheno input/phenotype.txt --pheno-name TSLL --linear --allow-no-sex --out output/PLINK_result
 ```
-**Note:** The files above are examples; you may need to adjust them based on your actual file names.
+**Note:** The file paths and names provided are examples. Please modify them accordingly to match your actual data files.
 
 ### Step 3: Get Top20 SNPs
 
-Execute the following command in the container to get top 20 SNPs:
+Execute the following command in the container to obatain the top 20 SNPs:
 
 ```bash
 (head -n 1 output/PLINK_result.assoc.linear && tail -n +2 output/PLINK_result.assoc.linear | sort -k9,9g | head -n 20) > output/PLINK_result_top20.linear
 ```
 
 ### Step 4: Review Results
+The analysis results are saved in the `output/`  directory:
 
-Results are saved in the `output/` directory.
-
-- `PLINK_result.assoc.linear`: Contains all the GWAS analysis results.
-- `PLINK_result_top20.linear`: Includes top 20 SNPs with the smallest P-values.
+- `PLINK_result.assoc.linear`: Contains the full GWAS results.
+- `PLINK_result_top20.linear`: List the top 20 SNPs with the smallest P-values.
 
 Please verify the output files to confirm the analysis completed successfully.
 

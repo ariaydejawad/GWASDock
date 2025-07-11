@@ -24,9 +24,26 @@ This folder contains scripts and instructions to perform GWAS analysis using GAP
 
 ### Step 1: Prepare Genotype Data 
 
-The millet dataset provides genotype data in PLINK binary format (.bed, .bim, .fam). To obtain genotype data in HapMap format (`millet.hmp.txt`), follow the instructions from Step 1 to Step 3 in the [README.md](../tassel/README.md) located in the TASSEL subdirectory, which is at the same directory level as GAPIT.
+The millet dataset provides genotype data in PLINK binary format (.bed, .bim, .fam). Use the `data_converter.sh` script in the [source/shell](../../../source/shell/) directory to convert this into GAPIT-compatible Hapmap format.
 
-### Step 2: Set Up Environment and Start Container
+Ensure Docker is running. Navigate to the shell directory and execute the following command to convert the genotype data into HapMap format (.hmp.txt) :
+
+```bash
+./data_converter.sh
+-i /Users/yourusername/dataset/input
+-o /Users/yourusername/dataset/output 
+-n 827millet 
+-f binary 
+-t hapmap 
+```
+Executing this command generates the `827millet_hapmap.hmp.txt` file, which is required for GAPIT GWAS analysis.
+
+**Note:** Replace `/Users/yourusername/dataset/input `and `/Users/yourusername/dataset/output` with your local paths. 
+
+### Step 2: Setup Environment and Launch Container
+
+Navigate to the directory containing the `setup_gapit_gwasdock.sh` script and run one of the following commands to enter the GAPIT container.
+
 ```bash
 bash setup_gapit_gwasdock.sh
 ```
@@ -44,7 +61,7 @@ Run the following command to convert the HapMap format genotype file (.hmp.txt) 
 ```bash
 Rscript data_conversion.R
 ```
-This process takes `Millet.hmp.txt` as input and generates two files: `GAPIT.Genotype.map.txt` and  `GAPIT.Genotype.Numerical.txt`.
+This process takes `827millet_hapmap.hmp.txt` as input and generates two files: `GAPIT.Genotype.map.txt` and  `GAPIT.Genotype.Numerical.txt`.
 
 Converting Genotype data from HapMap format to numeric (GD, GM) enhances analysis efficiency and reduces memory usage, enabling faster processing of the large dataset.
 
