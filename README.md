@@ -1,21 +1,47 @@
 # GWASDock
 
-## Project Information
-GWASDock is a collection of powerful genome-wide association study (GWAS) tools organized into reproducible docker build images. This project makes it much easier to reproduce GWAS experiments, port GWAS tools onto other computers, and be more productive with GWAS experiments using these tools. The project is an ongoing effort to make using GWAS tools as easy as possible, but its current version – with the working docker images for each GWAS tool – is more than enough to achieve the usability goals set out earlier. To help with the usage of docker, a dedicated **documentation** subdirectory has been created with all the command-line (or shell) commands to use docker, so that the user can easily build these GWAS images, and use them on their computers. The docker documentation for building and using each image for each GWAS tool is included/bundled into a **usage** subdirectory with its name. For example: **GAPIT** (Wang & Zhang, 2021) has a dedicated user's manual under the **documentation/usage/gapit-container** subdirectory from the project root – which is where this README.md file is located.
+GWASDock is a collection of powerful genome-wide association study (GWAS) tools organized into reproducible Docker images. This project aims to simplify the reproduction of GWAS experiment, enable seamless transfer of GWAS tools across different computing environments, and improve productivity in GWAS analyses.
 
-## GWASDock Usage Documentation
-The usage documentation for each tool describes how to reliably reproduce the container of each tool from scratch. To reliably reproduce the container of each tool from scratch, the user needs to: (1) build the image of each tool's container using `docker buildx build` or `docker build` using the provided Dockerfiles, and (2) run each tool as a standalone container either interactively or non-interactively using the `docker run` commands. Note: there are many variations to the way that you can run these containers, so feel free to experiment with non-interactive methods of using these containers as part of your workflow. To get help with learning Docker, and what it can do, visit the official Docker reference documentation here: https://docs.docker.com/.
+As an ongoing effort to enhance usability, the current release includes scripts that **automate environment setup and container execution** for each GWAS tool, as well as **data format conversion** between tools—surpassing the initial usability goals.
 
-For each tool, the usage documenation is called **README.md**, and is located in its appropriate subdirectory under the **documentation/usage** project directory. The usage documentation comes in the form of a Markdown document that is automatically rendered by GitHub when you visit the respective tool's **documentation/usage** directory.
+## User Guides and Documentation
 
-The usage documentation for each GWAS tool in this toolkit is located here:
-- **PLINK Container:** [documentation/usage/plink-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/plink-container)
-- **GCTA Container:** [documentation/usage/gcta-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/gcta-container)
-	- **Computer Architecture Notes:** **GCTA** is the only tool in the toolkit currently that requires the use of a different Dockerfile for building and using it on a user's computer depending on whether they are using either a `linux/amd64` or `linux/aarch64` system. The usage documentation describes this key distinction, and provides the respective `docker buildx build` and `docker container run` commands for each architecture.
-		- If you need to find out which computer architecture your computer supports, run `uname -a` to get this information. Based on this information, you will need to select the correct Dockerfile to use for building your desired image.
-- **TASSEL Container:** [documentation/usage/tassel-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/tassel-container)
-- **GAPIT Container:** [documentation/usage/gapit-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/gapit-container)
-- **FaST-LMM Container:** [documentation/usage/fastlmm-container](https://github.com/ariaydejawad/GWASDock/tree/main/documentation/usage/fastlmm-container)
+To facilitate user experience, we provide comprehensive, hands-on workflows for performing GWAS using GWASDock, our integrated multi-GWAS suite. 
+These workflows include detailed instructions for data format conversion using scripts and for automating the launch of GWAS tools within Docker containers.  
+
+The documentation is organized as follows: `documentation/examples/<corresponding GWAS tool folder>`.  
+
+Specifically, the documentation for various GWAS tools is structured under `documentation/examples/` with dedicated subfolders for each tool:
+
+- [PLINK](./documentation/examples/plink/readme.md)
+- [GCTA](./documentation/examples/gcta/)
+- [TASSEL](./documentation/examples/tassel/)
+- [GAPIT](./documentation/examples/gapit/)
+- [FaST-LMM](./documentation/examples/fastlmm/)
+
+Click on the links to access detailed workflows and instructions tailored for each tool.
+
+## Advanced Usage for Docker Experts
+
+If you are familiar with Docker, you can manually build images from the provided Dockerfiles and mount the appropriate directories to run the containers. All related commands for building images and launching containers are organized within subfolders under `documentation/usage/` for each GWAS tool.
+
+The documentation provides detailed step-by-step instructions on how to reliably reproduce each container environment from scratch, including:
+
+- Building the container image with `docker buildx build` or `docker build` using the specified Dockerfiles.  
+- Running each GWAS tool as a standalone container, either interactively or non-interactively, through the `docker run` commands.
+
+**Note:** There are multiple ways to run these containers; users are encouraged to experiment to find the workflow that best fits their needs. For additional guidance, refer to the official Docker documentation: https://docs.docker.com/.
+
+### Tool-specific Documentation Links
+
+Each tool has comprehensive instructions located in its subdirectory under `documentation/usage/`:
+
+- **PLINK Container:**[documentation/usage/plink-container](./documentation/usage/plink-container/)
+- **GCTA Container:**[documentation/usage/gcta-container](./documentation/usage/gcta-container)  
+  _Note on Architecture:_ GCTA requires different Dockerfiles depending on whether your system architecture is `linux/amd64` or `linux/aarch64`. The documentation details this distinction and provides the appropriate build and run commands. To identify your system architecture, run `uname -a`.
+- **TASSEL Container:** [documentation/usage/tassel-container](./documentation/usage/tassel-container)
+- **GAPIT Container:**[documentation/usage/gapit-container](./documentation/usage/gapit-container)
+- **FaST-LMM Container:** [documentation/usage/fastlmm-container](./documentation/usage/fastlmm-container)
 
 ## Currently Supported GWAS Tools
 Since each GWAS tool comes with its own set of reference manuals, each GWAS tool's manual has been linked under its entry in the "currently supported GWAS tools" list that follows. You can use these manuals to better understand how to use each tool either interactively or non-interactively.
