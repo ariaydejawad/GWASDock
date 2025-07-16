@@ -13,10 +13,10 @@ The documentation is organized as follows: `documentation/examples/<correspondin
 
 Specifically, the documentation for various GWAS tools is structured under `documentation/examples/` with dedicated subfolders for each tool:
 
-- [PLINK](./documentation/examples/plink/readme.md)
-- [GCTA](./documentation/examples/gcta/)
+- [PLINK](./documentation/examples/plink/)
 - [TASSEL](./documentation/examples/tassel/)
 - [GAPIT](./documentation/examples/gapit/)
+- [GCTA](./documentation/examples/gcta/)
 - [FaST-LMM](./documentation/examples/fastlmm/)
 
 Click on the links to access detailed workflows and instructions tailored for each tool.
@@ -37,10 +37,10 @@ The documentation provides detailed step-by-step instructions on how to reliably
 Each tool has comprehensive instructions located in its subdirectory under `documentation/usage/`:
 
 - **PLINK Container:**[documentation/usage/plink-container](./documentation/usage/plink-container/)
-- **GCTA Container:**[documentation/usage/gcta-container](./documentation/usage/gcta-container)  
-  _Note on Architecture:_ GCTA requires different Dockerfiles depending on whether your system architecture is `linux/amd64` or `linux/aarch64`. The documentation details this distinction and provides the appropriate build and run commands. To identify your system architecture, run `uname -a`.
 - **TASSEL Container:** [documentation/usage/tassel-container](./documentation/usage/tassel-container)
 - **GAPIT Container:**[documentation/usage/gapit-container](./documentation/usage/gapit-container)
+- **GCTA Container:**[documentation/usage/gcta-container](./documentation/usage/gcta-container)  
+  _Note on Architecture:_ GCTA requires different Dockerfiles depending on whether your system architecture is `linux/amd64` or `linux/aarch64`. The documentation details this distinction and provides the appropriate build and run commands. To identify your system architecture, run `uname -a`.
 - **FaST-LMM Container:** [documentation/usage/fastlmm-container](./documentation/usage/fastlmm-container)
 
 ## Currently Supported GWAS Tools
@@ -50,15 +50,15 @@ The currently supported GWAS tools are:
 - **PLINK** (versions 1.9 and 2.0) by Chang et al. (2015) (DOI: [10.1186/s13742-015-0047-8](https://doi.org/10.1186/s13742-015-0047-8))
 	- The original **PLINK** (version 1.0) was developed by Purcell et al. (2007) (DOI: [10.1086/519795](https://doi.org/10.1086/519795))
 	- **PLINK Usage Manual:** The website that hosts the **PLINK** usage manual is located here: https://www.cog-genomics.org/plink/1.9/general_usage.
-- **GCTA** (version 1.94.1) by Yang et al. (2011) (DOI: [10.1016/j.ajhg.2010.11.011](https://doi.org/10.1016/j.ajhg.2010.11.011))
-	- **GCTA Usage Manual:** The website that hosts the **GCTA** usage manual is located here: https://yanglab.westlake.edu.cn/software/gcta/#Overview.
+- **TASSEL** (version 5.2.95) by Bradbury et al. (2007) (DOI: [10.1093/bioinformatics/btm308](https://doi.org/10.1093/bioinformatics/btm308))
+	- **Note on TASSEL:** Only the command-line interface (CLI) for **TASSEL** is supported. The graphical user interface (GUI) version of **TASSEL** is less capable and stable than the CLI version, and it does not provide a scriptable interface to be used non-interactively as part of larger bioinformatics workflows. It is strongly recommended that you use the CLI version of **TASSEL** in any case, but it is nearly impossible to use the GUI version by design in the provided **TASSEL** container, since the user is expected to be familiar with the TASSEL CLI.
+	- **TASSEL Usage Manual:** The website that hosts the **TASSEL** usage manual is located here: https://bitbucket.org/tasseladmin/tassel-5-source/wiki/UserManual.
 - **GAPIT** (version 3) by Wang & Zhang (2021) (DOI: [10.1016/j.gpb.2021.08.005](https://doi.org/10.1016/j.gpb.2021.08.005))
 	- Version 2 of **GAPIT** was developed by Tang et al. (2016) (DOI: [10.3835/plantgenome2015.11.0120](https://doi.org/10.3835/plantgenome2015.11.0120))
 	- Version 1 (the original) of **GAPIT** was developed by Lipka et al. (2012) (DOI: [10.1093/bioinformatics/bts444](https://doi.org/10.1093/bioinformatics/bts444))
 	- **GAPIT Usage Manual:** The website that hosts the usage manual of **GAPIT** is located here: https://github.com/jiabowang/GAPIT/blob/master/Documents/gapit_help_document.pdf.
-- **TASSEL** (version 5.2.95) by Bradbury et al. (2007) (DOI: [10.1093/bioinformatics/btm308](https://doi.org/10.1093/bioinformatics/btm308))
-	- **Note on TASSEL:** Only the command-line interface (CLI) for **TASSEL** is supported. The graphical user interface (GUI) version of **TASSEL** is less capable and stable than the CLI version, and it does not provide a scriptable interface to be used non-interactively as part of larger bioinformatics workflows. It is strongly recommended that you use the CLI version of **TASSEL** in any case, but it is nearly impossible to use the GUI version by design in the provided **TASSEL** container, since the user is expected to be familiar with the TASSEL CLI.
-	- **TASSEL Usage Manual:** The website that hosts the **TASSEL** usage manual is located here: https://bitbucket.org/tasseladmin/tassel-5-source/wiki/UserManual.
+- **GCTA** (version 1.94.1) by Yang et al. (2011) (DOI: [10.1016/j.ajhg.2010.11.011](https://doi.org/10.1016/j.ajhg.2010.11.011))
+	- **GCTA Usage Manual:** The website that hosts the **GCTA** usage manual is located here: https://yanglab.westlake.edu.cn/software/gcta/#Overview.
 - **FaST-LMM** (version 0.6.12) by Lippert et al. (2011) (DOI: [10.1038/nmeth.1681](https://doi.org/10.1038/nmeth.1681))
 	- GWASDock supports the following fork/implementation of FaST-LMM by Carl Kadie (Microsoft): [FaST-LMM](https://github.com/fastlmm/FaST-LMM)
 	- **FaST-LMM:** The usage documentation for **FaST-LMM** is located here: https://fastlmm.github.io/FaST-LMM/.
